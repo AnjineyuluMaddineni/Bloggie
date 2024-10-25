@@ -9,14 +9,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+//Configure DBContext with SQL
 builder.Services.AddDbContext<BloggieDbContext>(options =>
 options.UseSqlServer(builder.Configuration.GetConnectionString("BloggieDbConnectionString")));
 
+//Configure AuthDbContext with SQL
 builder.Services.AddDbContext<AuthDbContext>(options =>
 options.UseSqlServer(builder.Configuration.GetConnectionString("BloggieAuthDbConnectionString")));
-
-builder.Services.AddIdentity<IdentityUser, IdentityRole>()
-    .AddEntityFrameworkStores<AuthDbContext>();
 
 builder.Services.Configure<IdentityOptions>(options =>
 {
@@ -30,7 +29,10 @@ builder.Services.Configure<IdentityOptions>(options =>
 
 });
 
+builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+    .AddEntityFrameworkStores<AuthDbContext>();
 
+//Configure the services
 builder.Services.AddScoped<ITagRepository, TagRepository>();
 builder.Services.AddScoped<IBlogPostRepository, BlogPostRepository>();
 builder.Services.AddScoped<IImageRepository, CloudinaryImageRepository>();

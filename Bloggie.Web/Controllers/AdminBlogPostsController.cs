@@ -47,24 +47,43 @@ namespace Bloggie.Web.Controllers
                 Visible = addBlogPostRequest.Visible,
             };
 
-            //Map Tags from selected tags
-            var seletedTags=new List<Tag>();
-            foreach (var seletedTagId in addBlogPostRequest.SeletedTags)
+            // Map selected tags
+            var selectedTags = new List<Tag>();
+            if (addBlogPostRequest.SeletedTags != null)
             {
-                var seletedTagIdAsGuid = Guid.Parse(seletedTagId);
-                var existingTag=await tagRepository.GetAsync(seletedTagIdAsGuid);
-
-                if (existingTag!=null)
+                foreach (var selectedTagId in addBlogPostRequest.SeletedTags)
                 {
-                    seletedTags.Add(existingTag);
+                    var selectedTagIdAsGuid = Guid.Parse(selectedTagId);
+                    var existingTag = await tagRepository.GetAsync(selectedTagIdAsGuid);
+
+                    if (existingTag != null)
+                    {
+                        selectedTags.Add(existingTag);
+                    }
                 }
             }
-            //Mapping tags back to domain model
-            blogPost.Tags= seletedTags;
 
-            await blogPostRepository.AddAsync(blogPost);
+            blogPost.Tags = selectedTags;
 
-            return RedirectToAction("Add");
+            try
+            {
+                // Add blog post to repository
+                await blogPostRepository.AddAsync(blogPost);
+
+                // Redirect to the blog post list or success page
+                return RedirectToAction("List");
+            }
+            catch (Exception ex)
+            {
+                // Handle exceptions gracefully
+                ModelState.AddModelError("", "An error occurred while saving the blog post.");
+
+                // Reload the tags in case of error
+                var tags = await tagRepository.GetAllAsync();
+                addBlogPostRequest.Tags = tags.Select(x => new SelectListItem { Text = x.DisplayName, Value = x.Id.ToString() });
+
+                return View(addBlogPostRequest);
+            }
         }
 
         [HttpGet]
@@ -120,7 +139,7 @@ namespace Bloggie.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(EditBlogPostRequest editBlogPostRequest)
         {
-            // map view model back to domain model
+            // Map view model back to domain model
             var blogPostDomainModel = new BlogPost
             {
                 Id = editBlogPostRequest.Id,
@@ -136,14 +155,12 @@ namespace Bloggie.Web.Controllers
             };
 
             // Map tags into domain model
-
             var selectedTags = new List<Tag>();
             foreach (var selectedTag in editBlogPostRequest.SelectedTags)
             {
                 if (Guid.TryParse(selectedTag, out var tag))
                 {
                     var foundTag = await tagRepository.GetAsync(tag);
-
                     if (foundTag != null)
                     {
                         selectedTags.Add(foundTag);
@@ -159,28 +176,32 @@ namespace Bloggie.Web.Controllers
             if (updatedBlog != null)
             {
                 // Show success notification
-                return RedirectToAction("Edit");
+                TempData["SuccessMessage"] = "Blog post updated successfully!";
+                return RedirectToAction("Edit", new { id = editBlogPostRequest.Id });
             }
 
             // Show error notification
-            return RedirectToAction("Edit");
+            TempData["ErrorMessage"] = "Error updating blog post.";
+            return RedirectToAction("Edit", new { id = editBlogPostRequest.Id });
         }
+
         [HttpPost]
         public async Task<IActionResult> Delete(EditBlogPostRequest editBlogPostRequest)
         {
+            // Talk to repository to delete this blog post and associated tags
+            var deletedBlogPost = await blogPostRepository.DeleteAsync(editBlogPostRequest.Id);
 
-            //Talk to repository to delete this blog post and tags
-            var deletedBlogPost= await blogPostRepository.DeleteAsync(editBlogPostRequest.Id);
-
-            if (deletedBlogPost!=null)
+            if (deletedBlogPost != null)
             {
-                //Show success notification
+                // Set success notification
+                TempData["SuccessMessage"] = "Blog post deleted successfully!";
                 return RedirectToAction("List");
             }
-            //Show error notification
-            return RedirectToAction("Edit", new {id=editBlogPostRequest.Id});
 
-
+            // Set failure notification
+            TempData["ErrorMessage"] = "Error: Unable to delete the blog post.";
+            return RedirectToAction("Edit", new { id = editBlogPostRequest.Id });
         }
+
     }
 }

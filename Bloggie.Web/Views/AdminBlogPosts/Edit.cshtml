@@ -10,85 +10,102 @@
 </div>
 
 <div class="container py-5">
+    <!-- Success and Error Notifications -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
     @if (Model != null)
     {
-        <form method="post">
-        <div class="mb-3">
-            <label class="form-label">Id</label>
-            <input type="text" class="form-control" id="id" asp-for="Id" readonly />
-        </div>
+        <form method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label class="form-label">Id</label>
+                <input type="text" class="form-control" id="id" asp-for="Id" readonly />
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">Heading</label>
-            <input type="text" class="form-control" id="heading" asp-for="Heading" />
-        </div>
+            <div class="mb-3">
+                <label class="form-label">Heading</label>
+                <input type="text" class="form-control" id="heading" asp-for="Heading" />
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">Page Title</label>
-            <input type="text" class="form-control" id="pageTitle" asp-for="PageTitle" />
-        </div>
+            <div class="mb-3">
+                <label class="form-label">Page Title</label>
+                <input type="text" class="form-control" id="pageTitle" asp-for="PageTitle" />
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">Content</label>
-            <textarea class="form-control" id="content" asp-for="Content"></textarea>
-        </div>
+            <div class="mb-3">
+                <label class="form-label">Content</label>
+                <textarea class="form-control" id="content" asp-for="Content"></textarea>
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">Short Description</label>
-            <input type="text" class="form-control" id="shortDescription" asp-for="ShortDescription" />
-        </div>
+            <div class="mb-3">
+                <label class="form-label">Short Description</label>
+                <input type="text" class="form-control" id="shortDescription" asp-for="ShortDescription" />
+            </div>
 
-         <div class="mb-3">
-            <label class="form-label">Featured Image Upload</label>
-            <input type="file" id="featuredImageUpload" class="form-control" />
+            <div class="mb-3">
+                <label class="form-label">Featured Image Upload</label>
+                <input type="file" id="featuredImageUpload" class="form-control" />
 
-            <img src="" id="featuredImageDisplay"style="display:none;width:300px;"/>
-        </div>
+                <img src="" id="featuredImageDisplay" style="display:none;width:300px;" />
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">Featured Image Url</label>
-            <input type="text" class="form-control" id="featuredImageUrl" asp-for="FeaturedImageUrl" />
-        </div>
+            <div class="mb-3">
+                <label class="form-label">Featured Image Url</label>
+                <input type="text" class="form-control" id="featuredImageUrl" asp-for="FeaturedImageUrl" />
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">Url Handle</label>
-            <input type="text" class="form-control" id="urlHandle" asp-for="UrlHandle" />
-        </div>
+            <div class="mb-3">
+                <label class="form-label">Url Handle</label>
+                <input type="text" class="form-control" id="urlHandle" asp-for="UrlHandle" />
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">Published Date</label>
-            <input type="date" class="form-control" id="publishedDate" asp-for="PublishedDate" />
-        </div>
+            <div class="mb-3">
+                <label class="form-label">Published Date</label>
+                <input type="date" class="form-control" id="publishedDate" asp-for="PublishedDate" />
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">Author</label>
-            <input type="text" class="form-control" id="author" asp-for="Author" />
-        </div>
-        <div class="form-check mb-3">
-            <input class="form-check-input" type="checkbox" id="visible" asp-for="Visible">
-            <label class="form-check-label">
-                Is Visible?
-            </label>
-        </div>
+            <div class="mb-3">
+                <label class="form-label">Author</label>
+                <input type="text" class="form-control" id="author" asp-for="Author" />
+            </div>
 
-             <div class="mb-3">
-                    <label class="form-label">Tags</label>
-                    <select class="form-select"
-                            asp-items="@Model.Tags"
-                            asp-for="SelectedTags">
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <button type="submit" class="btn btn-dark">Update</button>
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="visible" asp-for="Visible">
+                <label class="form-check-label">Is Visible?</label>
+            </div>
 
-                    <button type="submit"
+            <div class="mb-3">
+                <label class="form-label">Tags</label>
+                <select class="form-select" asp-items="@Model.Tags" asp-for="SelectedTags">
+                    <!-- Options for tags -->
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <button type="submit" class="btn btn-dark">Update</button>
+
+                <button type="submit"
                         class="btn btn-danger ms-2"
                         asp-area=""
                         asp-controller="AdminBlogPosts"
-                        asp-action="Delete">
-                        Delete
-                    </button>
-               </div>
+                        asp-action="Delete"
+                        onclick="return confirm('Are you sure you want to delete this blog post?');">
+                    Delete
+                </button>
+            </div>
+
         </form>
 
     }
@@ -104,11 +121,9 @@
             imageUploadURL: '/api/images'
         });
 
-
         const featuredUploadElement = document.getElementById('featuredImageUpload');
         const featuredImageUrlElement = document.getElementById('featuredImageUrl');
         const featuredImageDisplayElement = document.getElementById('featuredImageDisplay');
-
 
         async function uploadFeaturedImage(e) {
             console.log(e.target.files[0]);
@@ -130,8 +145,6 @@
                 });
         }
 
-
         featuredUploadElement.addEventListener('change', uploadFeaturedImage);
-
     </script>
-    }
+}

@@ -9,7 +9,24 @@
 </div>
 
 <div class="container py-5">
-    @if (Model!=null)
+
+    <!-- Success and Error Notifications -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (Model != null)
     {
         <form method="post">
             <div class="mb-3">
@@ -28,24 +45,24 @@
             </div>
 
             <div class="mb-3">
-
                 <div class="d-flex">
                     <button type="submit" class="btn btn-dark">Update</button>
 
-                    <button class="btn btn-danger ms-2" type="submit"
+                    <button class="btn btn-danger ms-2"
+                            type="submit"
                             asp-area=""
                             asp-controller="AdminTags"
-                            asp-action="Delete">
+                            asp-action="Delete"
+                            onclick="return confirm('Are you sure you want to delete this tag?');">
                         Delete
                     </button>
                 </div>
-
             </div>
         </form>
     }
     else
     {
-        <p>Tag not found! </p>
+        <p>Tag not found!</p>
     }
 
 </div>

@@ -112,36 +112,37 @@ namespace Bloggie.Web.Controllers
                 DisplayName = editTagRequest.DisplayName
             };
 
-            var updatedTag= await tagRepository.UpdateAsync(tag);
+            var updatedTag = await tagRepository.UpdateAsync(tag);
 
-            if (updatedTag!=null)
+            if (updatedTag != null)
             {
-                //Show success notification
+                // Show success notification
+                TempData["SuccessMessage"] = "Tag updated successfully!";
             }
             else
             {
-                //Show error notification
+                // Show error notification
+                TempData["ErrorMessage"] = "Error updating the tag.";
             }
 
-
-           
-            return RedirectToAction("Edit",new {id=editTagRequest.Id});
-
+            return RedirectToAction("Edit", new { id = editTagRequest.Id });
         }
-
         public async Task<IActionResult> Delete(EditTagRequest editTagRequest)
         {
-            var deletedTag=await tagRepository.DeleteAsync(editTagRequest.Id);
+            var deletedTag = await tagRepository.DeleteAsync(editTagRequest.Id);
 
-            if (deletedTag!=null)
+            if (deletedTag != null)
             {
-                //show success notification
+                // Show success notification
+                TempData["Notification"] = "Tag deleted successfully!";
                 return RedirectToAction("List");
             }
-            //show an Error notification
-            return RedirectToAction("Edit",new {id=editTagRequest.Id});
 
+            // Show error notification
+            TempData["ErrorNotification"] = "Error: Unable to delete the tag.";
+            return RedirectToAction("Edit", new { id = editTagRequest.Id });
         }
+
 
         private void ValidateAddTagRequest(AddTagRequest request)
         {
