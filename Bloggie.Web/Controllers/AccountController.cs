@@ -1,4 +1,5 @@
 ﻿using Bloggie.Web.Models.ViewModels;
+using Bloggie.Web.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,12 +9,14 @@ namespace Bloggie.Web.Controllers
     {
         private readonly UserManager<IdentityUser> userManager;
         private readonly SignInManager<IdentityUser> signInManager;
+        private readonly IDatabaseLogger _logger;
 
         public AccountController(UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager)
+            SignInManager<IdentityUser> signInManager, IDatabaseLogger logger)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
+            _logger = logger;
         }
 
 
@@ -70,27 +73,43 @@ namespace Bloggie.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel loginViewModel)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return View();
-            }
-
-            var signInResult = await signInManager.PasswordSignInAsync(loginViewModel.Username,
-                loginViewModel.Password, false, false);
-
-            if (signInResult != null && signInResult.Succeeded)
-            {
-                if (!string.IsNullOrWhiteSpace(loginViewModel.ReturnUrl))
+                if (!ModelState.IsValid)
                 {
-                    return Redirect(loginViewModel.ReturnUrl);
+                    return View(loginViewModel);
                 }
 
-                return RedirectToAction("Index", "Home");
-            }
+                var signInResult = await signInManager.PasswordSignInAsync(
+                    loginViewModel.Username,
+                    loginViewModel.Password,
+                    false,
+                    false
+                );
 
-            // Show errors
-            return View();
+                if (signInResult.Succeeded)
+                {
+                    await _logger.LogAsync($"User '{loginViewModel.Username}' logged in successfully.", "Info");
+                    if (!string.IsNullOrWhiteSpace(loginViewModel.ReturnUrl))
+                    {
+                        return Redirect(loginViewModel.ReturnUrl);
+                    }
+                    return RedirectToAction("Index", "Home");
+                }
+
+                await _logger.LogAsync($"Invalid login attempt for username: '{loginViewModel.Username}'.", "Warning");
+                ModelState.AddModelError(string.Empty, "Invalid username or password. Please try again.");
+                return View(loginViewModel);
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogAsync("An error occurred during login.", "Error", ex.ToString());
+                ModelState.AddModelError(string.Empty, "An unexpected error occurred. Please try again later.");
+                return View(loginViewModel);
+            }
         }
+
+
 
         [HttpGet]
         public async Task<IActionResult> Logout()

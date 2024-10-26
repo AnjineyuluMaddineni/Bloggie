@@ -3,6 +3,8 @@ using Bloggie.Web.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Serilog;
+using Serilog.Events;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,6 +41,9 @@ builder.Services.AddScoped<IImageRepository, CloudinaryImageRepository>();
 builder.Services.AddScoped<IBlogPostLikeRepository, BlogPostLikeRepository>();
 builder.Services.AddScoped<IBlogPostcommentRepository, BlogPostcommentRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+//Register the Logger Service in Dependency Injection
+builder.Services.AddScoped<IDatabaseLogger, DatabaseLogger>();
 
 
 var app = builder.Build();
